@@ -1,0 +1,88 @@
+import os
+from openpyxl import Workbook
+import requests
+from openpyxl.styles import Font
+
+
+#########################################################################################################
+def verificar(dato):
+    while dato == "" :
+        print("Campo nombre vacio")
+        dato = input("Ingrese el nombre nuevamente: ")
+    return dato
+
+def convertir(dato):
+    while True:
+        try:
+            dato = int(dato)
+            break
+        except ValueError:
+            print("La cantidad debe ser un numero")
+        dato = input("Ingrese dato nuevamente: ")
+    return dato
+
+def total(a,b,c,u):
+    tot = (a+b+c)*u
+    return tot
+
+def negrita(a):
+    ws[a].font = Font (bold = True)
+###########################################################################################################
+wb = Workbook()
+nombre = 'empanadas.xlsx'
+ws = wb.active
+ws["A1"] = "Nombre"
+ws["B1"] = "Carne"
+ws["C1"] = "J y Q"
+ws["D1"] = "Humita"
+ws["E1"] = "Total"
+
+negrita("A1")
+negrita("B1")
+negrita("C1")
+negrita("D1")
+negrita("E1")
+
+r = requests.get("https://www.dolarsi.com/api/api.php?type=valoresprincipales")
+datos = r.json()
+dolar = datos[0]["casa"]["venta"]
+dolar = dolar.replace(",",".")
+dolar = float(dolar)
+cont = 1
+while True:
+    os.system('cls')
+    cont = cont + 1
+    print("""
+    Menu:
+    1 - Generar pedido:
+    2 - Salir del sistema
+    """)
+    opcion = input(">>> ")
+    if opcion == "1":
+        cliente = input("ingrese nombre del cliente: ")
+        cliente = verificar(cliente)
+        ec = input("Ingrese cantidad de Empanadas de Carne: ")
+        print(type(ec))
+        ec = convertir(ec)
+        print(type(ec))
+        ejyq = input("ingrese cantidad de empanadas de jamon y queso: ")
+        ejyq = convertir(ejyq)
+        eh = input("ingrese cantidad de empanadas de humita: ")
+        eh = convertir(eh)
+        print("El importe a abonar es: $",total(ec,ejyq,eh,dolar))
+        t = total(ec,ejyq,eh,dolar)
+        ws[f'A{cont}'] = cliente
+        ws[f'B{cont}'] = ec
+        ws[f'C{cont}'] = ejyq
+        ws[f'D{cont}'] = eh
+        ws[f'E{cont}'] = t
+        input("toque enter para continuar")
+    elif opcion == "2":
+        print("Gracias por utilizar el sistema")
+        break
+    else:
+        print("Opcion incorrecta por favor elija opcion 1 o 2")
+        input("toque enter para volver a elegir una opcion...")
+wb.save(filename = nombre)
+wb.close()
+    
